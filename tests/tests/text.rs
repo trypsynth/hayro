@@ -11,7 +11,7 @@ use hayro_syntax::Pdf;
 use std::fmt::Write;
 
 pub(crate) fn tests() -> Vec<Test> {
-    let units: [(&str, fn()); 7] = [
+    let units: [(&str, fn()); 8] = [
         ("text::glyph_names", glyph_names),
         ("text::type3_glyph_names", type3_glyph_names),
         ("text::zapf_dingbats", zapf_dingbats),
@@ -19,6 +19,7 @@ pub(crate) fn tests() -> Vec<Test> {
         ("text::marked_content", marked_content),
         ("text::font_properties", font_properties),
         ("text::text_properties", text_properties),
+        ("text::cid_without_to_unicode", cid_without_to_unicode),
     ];
 
     units.map(|(name, run)| Test::unit(name, run)).into()
@@ -217,4 +218,12 @@ fn text_properties() {
             (plain, vec![0.0]),
         ]
     );
+}
+
+fn cid_without_to_unicode() {
+    // An embedded font with a Japan1 character collection and no `ToUnicode` map, drawing
+    // katakana ko and the long vowel mark in Shift-JIS.
+    let file = &read("pdfs/text/cid_without_to_unicode.pdf");
+
+    assert_eq!(page_text(file), "\u{30B3}\u{30FC}");
 }
